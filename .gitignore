@@ -39,6 +39,9 @@ id_rsa*
 sdkconfig
 sdkconfig.ci
 
+# ===== AI 协作工具本地数据（不上传）=====
+.workbuddy/
+
 # ===== 日志与临时文件 =====
 *.log
 *.tmp
