@@ -720,7 +720,7 @@ void lcd_off(void)
  * @param       无
  * @retval      无
  */
-void lcd_init(void)
+esp_err_t lcd_init(void)
 {
     int cmd = 0;
     esp_err_t ret = 0;
@@ -741,7 +741,10 @@ void lcd_init(void)
     
     /* 添加SPI总线设备 */
     ret = spi_bus_add_device(SPI2_HOST, &devcfg, &MY_LCD_Handle);   /* 配置SPI总线设备 */
-    ESP_ERROR_CHECK(ret);
+    if (ret != ESP_OK)
+    {
+        return ret;
+    }
 
     gpio_init_struct.intr_type = GPIO_INTR_DISABLE;                 /* 失能引脚中断 */
     gpio_init_struct.mode = GPIO_MODE_OUTPUT;                       /* 配置输出模式 */
@@ -804,6 +807,43 @@ void lcd_init(void)
     lcd_display_dir(1);                                             /* 设置屏幕方向 */
     LCD_PWR(1);
     lcd_clear(WHITE);                                               /* 清屏 */
+    return ESP_OK;
+}
+
+/**
+ * @brief       把图像的前 rows 行显示到屏幕顶部（用于给底部状态栏留位置）
+ * @param       img ：源图像（RGB565，宽度 = lcd_self.width）
+ * @param       rows：要显示的行数；屏幕高度以内。建议取 24 的整数倍（15360 字节 = 24 行），可整块写
+ * @retval      无
+ * @note        与 lcd_show_picture 的区别：只刷新屏幕上方，屏幕下方的状态栏不会被视频覆盖，
+ *              因此状态栏只需在状态变化时画一次，不会随视频刷新而闪烁。
+ */
+void lcd_show_picture_rows(const uint8_t *img, uint16_t rows)
+{
+    uint32_t total;
+    uint32_t offset = 0;
+
+    if (rows > lcd_self.height)
+    {
+        rows = lcd_self.height;
+    }
+
+    total = (uint32_t)lcd_self.width * rows * 2;            /* 本次要写入的字节数 */
+
+    lcd_set_window(0, 0, lcd_self.width - 1, rows - 1);
+
+    while (offset < total)
+    {
+        uint32_t n = total - offset;
+
+        if (n > LCD_BUF_SIZE)
+        {
+            n = LCD_BUF_SIZE;
+        }
+        memcpy(lcd_buf, &img[offset], n);
+        lcd_write_data(lcd_buf, n);
+        offset += n;
+    }
 }
 
 void lcd_show_picture(uint8_t *img)

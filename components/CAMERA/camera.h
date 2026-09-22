@@ -6,9 +6,11 @@
 #include"driver/gpio.h"
 #include"lcd.h"
 #include"esp_camera.h"
+#include"esp_err.h"
 
-void camera_init(void);
+esp_err_t camera_init(void);
 void camera_show(void);
+esp_err_t camera_show_rows(uint16_t rows);
 
 
 

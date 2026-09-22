@@ -28,6 +28,7 @@
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_err.h"
 #include "driver/gpio.h"
 #include "spi.h"
 #include"xl9555.h"
@@ -120,7 +121,7 @@ extern lcd_obj_t lcd_self;
 extern uint8_t lcd_buf[LCD_TOTAL_BUF_SIZE];
 
 /* 函数声明 */
-void lcd_init(void);                                                                                                    /* 初始化LCD */
+esp_err_t lcd_init(void);                                                                                               /* 初始化LCD */
 void lcd_clear(uint16_t color);                                                                                         /* 清屏函数 */
 void lcd_scan_dir(uint8_t dir);                                                                                         /* 设置LCD的自动扫描方向 */
 void lcd_write_data(const uint8_t *data, int len);                                                                      /* 发送数据到LCD */
@@ -137,6 +138,7 @@ void lcd_draw_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,uint16_t c
 void lcd_draw_pixel(uint16_t x, uint16_t y, uint16_t color);                                                            /* 绘画一个像素点 */
 void lcd_show_char(uint16_t x, uint16_t y, uint8_t chr, uint8_t size, uint8_t mode, uint16_t color);                    /* 在指定位置显示一个字符 */
 void lcd_show_picture(uint8_t *img);
+void lcd_show_picture_rows(const uint8_t *img, uint16_t rows);                                                          /* 只把图像的前 rows 行显示到屏幕顶部，底部留给状态栏 */
 
 
 #endif
